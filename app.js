@@ -15,13 +15,22 @@ firebase.initializeApp(firebaseConfig);
 // firebase.analytics();
 var db = firebase.database()
 
+// pass original date in seconds (unix) and rate in minutes
+const getNext = (original, rate) => {
 
-{/* <tr>
-  <th scope="row">1</th>
-  <td>Mark</td>
-  <td>Otto</td>
-  <td>@mdo</td>
-</tr> */}
+  const rateInSeconds = rate * 60
+
+  const now = moment().unix()
+
+  let lapse = original
+
+  while (lapse < now) {
+    lapse += rateInSeconds
+  }
+
+  return moment((lapse + rate), 'X').format('MMMM, Do YYYY hh:mm a')
+}
+
 
 document.getElementById('addTrain').addEventListener('click', function () {
   event.preventDefault()
@@ -31,8 +40,19 @@ document.getElementById('addTrain').addEventListener('click', function () {
     trainDest: document.getElementById("destination").value,
     trainTime: document.getElementById("time").value,
     trainFreq: document.getElementById("frequency").value
-  }
+  };
 
-  console.log(train)
-  db.ref().push(train)
-})
+  console.log(train);
+  db.ref().push(train);
+});
+
+
+db.ref().on("child_added", function (snapshot) {
+  console.log(snapshot.key, snapshot.val());
+
+  var key = snapshot.key
+  var trainName = snapshot.val().trainName;
+  var destination = snapshot.val().destination;
+  var frequency = parseInt(snapshot.val().frequency);
+  var firstTrain = snapshot.val().firstTrain;
+});
